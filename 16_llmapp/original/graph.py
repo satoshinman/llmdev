@@ -1,9 +1,5 @@
 import os
 from dotenv import load_dotenv
-import tiktoken
-from langchain_community.document_loaders import DirectoryLoader
-from langchain_community.document_loaders import PyPDFLoader
-from langchain_text_splitters import CharacterTextSplitter
 from langchain_openai import OpenAIEmbeddings
 from langchain_chroma import Chroma
 from langchain.tools.retriever import create_retriever_tool
@@ -19,9 +15,7 @@ from typing import Annotated
 from typing_extensions import TypedDict
 from langchain_community.document_loaders import JSONLoader
 from langchain.indexes import VectorstoreIndexCreator
-from langchain.schema import Document
 import logging
-import json
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -49,41 +43,6 @@ def create_index(persist_directory, embedding_model):
     current_script_path = os.path.abspath(__file__)
     # 実行中のスクリプトが存在するディレクトリを取得
     current_directory = os.path.dirname(current_script_path)
-
-    # テキストファイルを読込
-    # loader = DirectoryLoader(f'{current_directory}/data/pdf', glob="./*.pdf",   loader_cls=PyPDFLoader)
-    # documents = loader.load()
-
-    # チャンクに分割
-    # encoding_name = tiktoken.encoding_for_model(MODEL_NAME).name
-    # text_splitter = CharacterTextSplitter.from_tiktoken_encoder(encoding_name)
-    # texts = text_splitter.split_documents(documents)
-
-    # JSON → Document
-    # logging.debug("Loading JSON data...")
-    # loader = JSONLoader(
-    #     file_path=f'{current_directory}/data/mic_corpus_chunks.json',
-    #     jq_schema=".[] | {text: .text, metadata: .meta}",
-    #     text_content=False,
-    # )
-
-    # with open(f'{current_directory}/data/mic_corpus_chunks.json', 'r', encoding='utf-8') as f:
-    #     data = json.load(f)
-
-    # documents = [Document(page_content=item['text'], metadata=item['metadata']) for item in data]
-
-    # emb = OpenAIEmbeddings()
-    # persist_directory = f'{current_directory}/chroma_db'
-    # logging.debug("Persist Directory: %s", persist_directory)
-    # index = VectorstoreIndexCreator(
-    #     embedding=emb,
-    #     vectorstore_cls=Chroma,
-    #     vectorstore_kwargs={
-    #         "persist_directory": persist_directory,
-    #         "collection_name": "mic_corpus",
-    #     }
-    # ).from_documents(documents)
-
     # ---- Settings ----
     JSON_PATH = f'{current_directory}/data/mic_corpus_chunks.json'
     PERSIST_DIR = f'{current_directory}/chroma_db'
@@ -162,7 +121,7 @@ def build_graph(model_name, memory):
     モデル名とメモリを使用して、実行可能なグラフを作成します。
     """
     # 役割や前提の設定
-    role = "あなたはマンガに出てくるセレブな奥様です。一人称は「ワタクシ」、語尾は「～ザマス」や「～ザマスのよ」。"
+    role = f"あなたはマンガに出てくるセレブな奥様です。一人称は「ワタクシ」、語尾は「～ザマス」や「～ザマスのよ」。"
 
     # グラフのインスタンスを作成
     graph_builder = StateGraph(State)
